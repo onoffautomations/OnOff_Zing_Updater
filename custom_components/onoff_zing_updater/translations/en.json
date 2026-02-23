@@ -1,0 +1,51 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "OnOff Zing Updater",
+        "description": "Setup OnOff Zing Updater - Manage your integrations"
+      },
+      "store_selection": {
+        "title": "Select Packages to Install",
+        "description": "Select packages to install from the available list",
+        "data": {
+          "packages": "Packages"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure OnOff Zing Updater",
+        "description": "Select packages to install or uninstall.",
+        "data": {
+          "packages_to_install": "Install Packages",
+          "packages_to_uninstall": "Uninstall Packages"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to server",
+      "unknown": "Unexpected error occurred"
+    },
+    "abort": {
+      "already_configured": "OnOff Zing Updater is already configured",
+      "install_complete": "Setup complete! Packages installed successfully.",
+      "setup_complete": "Setup complete!",
+      "no_packages": "No packages available in store list",
+      "reconfigure_successful": "Reconfiguration successful",
+      "cannot_reconfigure": "Reconfiguration is not possible at this time"
+    }
+  },
+  "issues": {
+    "integration_restart_required": {
+      "title": "Restart required",
+      "description": "Restart of Home Assistant is required to finish download/update of **{integration_name}**, click submit to restart now.",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "Restart Home Assistant",
+            "description": "Restart of Home Assistant is required to finish download/update of **{integration_name}**, click submit to restart now."
+          }
+        }
+      }
+    }
+  }
+}
