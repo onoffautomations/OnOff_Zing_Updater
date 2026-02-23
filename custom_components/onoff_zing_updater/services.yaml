@@ -1,0 +1,4 @@
+check_updates:
+  name: Check for Updates
+  description: Manually check for updates for all tracked packages.
+  fields: {}
