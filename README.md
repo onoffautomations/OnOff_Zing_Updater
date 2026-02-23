@@ -66,31 +66,15 @@ A Home Assistant custom integration for managing and updating custom integration
 Updates are checked automatically. When an update is available:
 
 - The package's **Update Available** sensor will show "Yes"
-- You can update via:
-  - The **Update** entity in Home Assistant's update dashboard
-  - The package's **Update** button entity
+- You can update via the **Update** entity in Home Assistant's update dashboard
 - After updating an integration, a repair issue will prompt you to restart
-
-### Entities
-
-For each installed package, the following entities are created:
-
-| Entity | Description |
-|--------|-------------|
-| Version Sensor | Shows the currently installed version |
-| Update Available Sensor | Shows "Yes" or "No" for update availability |
-| Type Sensor | Shows the package type (Integration/Lovelace) |
-| Waiting Restart Sensor | Shows if a restart is needed (integrations only) |
-| Update Button | Triggers an update for the package |
-| Check for Updates Button | Manually checks for updates |
-| Update Entity | Native Home Assistant update entity |
 
 ## Available Packages
 
 The integration comes with a pre-configured list of packages from the OnOff store, including:
-
-- **Integrations**: OnOff Support Agent, OnOff Licenser, Zing Music, Kasa Cloud, WTime, CloudFlare DDNS Updater
-- **Lovelace Cards**: Zing Card, OnOff Health Report Card, OnOff Create Ticket Card
+- OnOff Licenser
+- Zing Music
+- Zing Card
 
 ## Troubleshooting
 
@@ -106,11 +90,3 @@ The integration comes with a pre-configured list of packages from the OnOff stor
 ### Integration not loading after install
 - Restart Home Assistant
 - Check the logs for any dependency issues
-
-## Support
-
-For issues and feature requests, please visit the [GitHub Issues](https://github.com/onoffautomations/OnOff_Zing_Updater/issues) page.
-
-## License
-
-This project is licensed under the MIT License.
