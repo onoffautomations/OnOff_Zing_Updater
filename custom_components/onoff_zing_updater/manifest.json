@@ -1,8 +1,8 @@
 {
   "domain": "onoff_zing_updater",
   "name": "OnOff - Zing Updater",
-  "version": "0.1.0",
-  "documentation": "onoffautomations.com/integrations",
+  "version": "0.1.2",
+  "documentation": "https://github.com/onoffautomations/OnOff_Zing_Updater",
   "config_flow": true,
   "requirements": [],
   "codeowners": [],
