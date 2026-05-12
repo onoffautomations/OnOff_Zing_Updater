@@ -1,0 +1,63 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "OnOff - Zing Updater",
+        "description": "Pick which Zing packages (and the OnOff Licenser) to install. Each package is labelled with its type — Integration, Card, or Blueprint — and will be installed to the right place automatically.\n\nYou can install more later by clicking Configure on the integration.",
+        "data": {
+          "packages": "Packages"
+        }
+      },
+      "reconfigure": {
+        "title": "Install more Zing packages",
+        "description": "Pick packages to install. Packages already installed are preselected — leaving them checked will re-fetch and update them.",
+        "data": {
+          "packages": "Packages"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to reach the Zing repository server",
+      "unknown": "Unexpected error occurred"
+    },
+    "abort": {
+      "already_configured": "OnOff - Zing Updater is already configured",
+      "no_packages": "No Zing packages are currently available",
+      "reconfigure_successful": "Configuration updated — selected packages are installing",
+      "cannot_reconfigure": "Reconfiguration is not possible at this time",
+      "unknown": "An unexpected error occurred. Check logs for details."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Manage Zing packages",
+        "description": "Pick packages to install. Packages already installed are preselected — leaving them checked will re-fetch and update them.",
+        "data": {
+          "packages": "Packages"
+        }
+      }
+    },
+    "abort": {
+      "no_packages_in_store": "No Zing packages are currently available"
+    }
+  },
+  "issues": {
+    "integration_restart_required": {
+      "title": "Restart required",
+      "description": "Restart of Home Assistant is required to finish download/update of **{integration_name}**, click submit to restart now.",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "Restart Home Assistant",
+            "description": "Restart of Home Assistant is required to finish download/update of **{integration_name}**, click submit to restart now."
+          }
+        }
+      }
+    },
+    "setup_restart_required": {
+      "title": "Restart required",
+      "description": "One or more integrations have been installed by OnOff - Zing Updater. Home Assistant must be restarted for the changes to take effect.\n\nGo to Settings → System → Restart to restart Home Assistant."
+    }
+  }
+}

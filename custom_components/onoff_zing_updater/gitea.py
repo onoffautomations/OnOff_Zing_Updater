@@ -1,0 +1,412 @@
+from __future__ import annotations
+
+import logging
+
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
+
+_LOGGER = logging.getLogger(__name__)
+
+
+class GiteaClient:
+    def __init__(self, hass: HomeAssistant, base_url: str, token: str = None):
+        self.hass = hass
+        self.base_url = base_url.rstrip("/")
+        self.token = token or None
+        self._token_valid = True # Assume valid until proven otherwise
+
+    def _headers(self, use_auth: bool = True) -> dict:
+        """Get headers - with or without auth token."""
+        headers = {"Accept": "application/json"}
+        if use_auth and self.token and self._token_valid:
+            headers["Authorization"] = f"token {self.token}"
+        return headers
+
+    async def test_auth(self) -> bool:
+        """Test authentication - returns True if no token (public access)."""
+        if not self.token:
+            _LOGGER.info("No token - assuming public access")
+            return True
+
+        try:
+            sess = async_get_clientsession(self.hass)
+            url = f"{self.base_url}/api/v1/user"
+            async with sess.get(url, headers=self._headers(), timeout=20) as resp:
+                self._token_valid = (resp.status == 200)
+                if not self._token_valid:
+                    _LOGGER.warning("Gitea authentication failed - token may be expired or revoked")
+                return self._token_valid
+        except Exception as e:
+            _LOGGER.debug("Auth test failed: %s", e)
+            self._token_valid = False
+            return False
+
+    async def get_repo(self, owner: str, repo: str) -> dict:
+        sess = async_get_clientsession(self.hass)
+        url = f"{self.base_url}/api/v1/repos/{owner}/{repo}"
+        async with sess.get(url, headers=self._headers(), timeout=30) as resp:
+            if resp.status != 200:
+                raise RuntimeError(f"Repo fetch failed: {resp.status} {await resp.text()}")
+            return await resp.json()
+
+    async def get_org_repos(self, org: str) -> list[dict]:
+        """Fetch all repositories for an organization."""
+        sess = async_get_clientsession(self.hass)
+        url = f"{self.base_url}/api/v1/orgs/{org}/repos"
+        async with sess.get(url, headers=self._headers(), timeout=30) as resp:
+            if resp.status != 200:
+                _LOGGER.error("Failed to fetch repos for org %s: %s", org, resp.status)
+                return []
+            return await resp.json()
+
+    async def get_user_repos(self, user: str) -> list[dict]:
+        """Fetch all repositories for a user."""
+        sess = async_get_clientsession(self.hass)
+        url = f"{self.base_url}/api/v1/users/{user}/repos"
+        async with sess.get(url, headers=self._headers(), timeout=30) as resp:
+            if resp.status != 200:
+                _LOGGER.error("Failed to fetch repos for user %s: %s", user, resp.status)
+                return []
+            return await resp.json()
+
+    async def get_user_orgs(self) -> list[dict]:
+        """Fetch all organizations the authenticated user belongs to."""
+        if not self.token:
+            return []
+        sess = async_get_clientsession(self.hass)
+        url = f"{self.base_url}/api/v1/user/orgs"
+        async with sess.get(url, headers=self._headers(), timeout=30) as resp:
+            if resp.status != 200:
+                _LOGGER.debug("Failed to fetch user orgs: %s", resp.status)
+                return []
+            return await resp.json()
+
+    async def get_current_user(self) -> dict | None:
+        """Fetch the authenticated user's info."""
+        if not self.token:
+            return None
+        sess = async_get_clientsession(self.hass)
+        url = f"{self.base_url}/api/v1/user"
+        try:
+            async with sess.get(url, headers=self._headers(), timeout=20) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+        except Exception as e:
+            _LOGGER.debug("Failed to fetch current user: %s", e)
+        return None
+
+    async def get_user_following(self) -> list[dict]:
+        """Fetch users that the authenticated user is following."""
+        if not self.token:
+            return []
+        sess = async_get_clientsession(self.hass)
+        url = f"{self.base_url}/api/v1/user/following"
+        try:
+            async with sess.get(url, headers=self._headers(), timeout=30) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+        except Exception as e:
+            _LOGGER.debug("Failed to fetch following: %s", e)
+        return []
+
+    async def get_org_info(self, org: str) -> dict | None:
+        """Fetch organization information to get display name."""
+        sess = async_get_clientsession(self.hass)
+        url = f"{self.base_url}/api/v1/orgs/{org}"
+        try:
+            async with sess.get(url, headers=self._headers(), timeout=20) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+        except Exception as e:
+            _LOGGER.debug("Failed to fetch org info for %s: %s", org, e)
+        return None
+
+    async def get_org_members(self, org: str) -> list[dict]:
+        """Fetch all members of an organization."""
+        sess = async_get_clientsession(self.hass)
+        url = f"{self.base_url}/api/v1/orgs/{org}/members"
+        try:
+            async with sess.get(url, headers=self._headers(), timeout=30) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+        except Exception as e:
+            _LOGGER.debug("Failed to fetch org members for %s: %s", org, e)
+        return []
+
+    async def get_user_info(self, user: str) -> dict | None:
+        """Fetch user information to get display name."""
+        sess = async_get_clientsession(self.hass)
+        url = f"{self.base_url}/api/v1/users/{user}"
+        try:
+            async with sess.get(url, headers=self._headers(), timeout=20) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+        except Exception as e:
+            _LOGGER.debug("Failed to fetch user info for %s: %s", user, e)
+        return None
+
+    async def get_releases(self, owner: str, repo: str) -> list[dict]:
+        """Fetch all releases for a repository."""
+        sess = async_get_clientsession(self.hass)
+        url = f"{self.base_url}/api/v1/repos/{owner}/{repo}/releases"
+        try:
+            async with sess.get(url, headers=self._headers(), timeout=30) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+        except Exception as e:
+            _LOGGER.debug("Failed to fetch releases for %s/%s: %s", owner, repo, e)
+        return []
+
+    async def get_file_content(self, owner: str, repo: str, file_path: str, branch: str = "main") -> str | None:
+        """Fetch content of a specific file."""
+        sess = async_get_clientsession(self.hass)
+        url = f"{self.base_url}/api/v1/repos/{owner}/{repo}/contents/{file_path}?ref={branch}"
+        try:
+            async with sess.get(url, headers=self._headers(), timeout=20) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    import base64
+                    content = base64.b64decode(data["content"]).decode("utf-8")
+                    return content
+        except Exception:
+            pass
+        return None
+
+    async def get_readme(self, owner: str, repo: str) -> str | None:
+        """Fetch the README content for a repository."""
+        sess = async_get_clientsession(self.hass)
+        # Try README.md, then readme.md, then README
+        for name in ["README.md", "readme.md", "README"]:
+            url = f"{self.base_url}/api/v1/repos/{owner}/{repo}/contents/{name}"
+            try:
+                async with sess.get(url, headers=self._headers(), timeout=20) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        import base64
+                        content = base64.b64decode(data["content"]).decode("utf-8")
+                        return content
+            except Exception:
+                continue
+        return None
+
+    async def get_latest_release(self, owner: str, repo: str) -> dict:
+        sess = async_get_clientsession(self.hass)
+        url = f"{self.base_url}/api/v1/repos/{owner}/{repo}/releases/latest"
+        async with sess.get(url, headers=self._headers(), timeout=30) as resp:
+            if resp.status != 200:
+                raise RuntimeError(f"Latest release fetch failed: {resp.status} {await resp.text()}")
+            return await resp.json()
+
+    async def get_release_by_tag(self, owner: str, repo: str, tag: str) -> dict:
+        sess = async_get_clientsession(self.hass)
+        url = f"{self.base_url}/api/v1/repos/{owner}/{repo}/releases/tags/{tag}"
+        async with sess.get(url, headers=self._headers(), timeout=30) as resp:
+            if resp.status != 200:
+                raise RuntimeError(f"Release-by-tag fetch failed: {resp.status} {await resp.text()}")
+            return await resp.json()
+
+    def pick_asset(self, release: dict, asset_name: str | None = None) -> dict:
+        assets = release.get("assets") or []
+        if not assets:
+            raise RuntimeError("Release has no assets. Attach a ZIP asset to the release, or use mode=zipball.")
+
+        if asset_name:
+            for a in assets:
+                if a.get("name") == asset_name:
+                    return a
+            raise RuntimeError(f"Asset '{asset_name}' not found in release assets.")
+
+        # Prefer a single .zip
+        zips = [a for a in assets if (a.get("name") or "").lower().endswith(".zip")]
+        if len(zips) == 1:
+            return zips[0]
+
+        if len(assets) == 1:
+            return assets[0]
+
+        raise RuntimeError("Multiple assets found. Specify asset_name.")
+
+    def archive_zip_url(self, owner: str, repo: str, ref: str) -> str:
+        # Gitea archive endpoint (zip of repo at ref)
+        # Example: /api/v1/repos/:owner/:repo/archive/:ref.zip
+        return f"{self.base_url}/api/v1/repos/{owner}/{repo}/archive/{ref}.zip"
+
+    async def search_repos(self, limit: int = 500) -> list[dict]:
+        """Search for all accessible repositories (paginated, in parallel).
+
+        Gitea caps per-page results (typically 50). Without pagination the
+        sidepanel was silently missing any repos beyond the first page —
+        which is what caused "not picking up everything right". We fire
+        all pages concurrently so total search time is one round-trip
+        rather than N.
+        """
+        import asyncio
+        sess = async_get_clientsession(self.hass)
+        per_page = 50
+        max_pages = max(1, (limit + per_page - 1) // per_page)
+
+        async def _fetch_page(page: int) -> list[dict]:
+            url = f"{self.base_url}/api/v1/repos/search?limit={per_page}&page={page}"
+            try:
+                async with sess.get(url, headers=self._headers(), timeout=60) as resp:
+                    if resp.status != 200:
+                        return []
+                    data = await resp.json()
+                    if isinstance(data, dict) and "data" in data:
+                        return data["data"] or []
+                    if isinstance(data, list):
+                        return data
+            except Exception as e:
+                _LOGGER.debug("Failed to search repos page %d: %s", page, e)
+            return []
+
+        page_results = await asyncio.gather(*[_fetch_page(p) for p in range(1, max_pages + 1)])
+        merged: list[dict] = []
+        for batch in page_results:
+            if batch:
+                merged.extend(batch)
+        return merged[:limit] if limit else merged
+
+    async def get_icon_url(self, owner: str, repo: str, branch: str = "main", domains: list[str] | None = None) -> str | None:
+        """Return a best-guess icon URL WITHOUT verifying existence.
+
+        Verifying icon existence used to cost 3-15 sequential HTTP requests
+        per repo and was the dominant cost on initial sidepanel load. The
+        frontend already has full fallback handling via brandImgError —
+        if this URL 404s the browser silently cycles through candidates
+        and finally hides the image. So we just build the most likely URL
+        and return immediately.
+        """
+        if domains is None:
+            try:
+                domains = await self.get_integration_domains(owner, repo, branch=branch)
+            except Exception:
+                domains = []
+
+        if domains:
+            return (
+                f"{self.base_url}/{owner}/{repo}/raw/branch/{branch}"
+                f"/custom_components/{domains[0]}/brand/icon.png"
+            )
+        # Fallback to legacy convention; if it 404s the frontend handles it.
+        return f"{self.base_url}/{owner}/{repo}/raw/branch/{branch}/icons/icon.png"
+
+    def get_raw_icon_url(self, owner: str, repo: str, branch: str = "main") -> str:
+        """Get the raw URL for potential icon files."""
+        return f"{self.base_url}/{owner}/{repo}/raw/branch/{branch}/icons/icon.png"
+
+
+    async def list_dir(self, owner: str, repo: str, path: str, branch: str = "main") -> list[dict]:
+        """List a directory in a repo using the Gitea contents API.
+
+        Returns a list of entries with keys like: name, path, type ('file'/'dir').
+        """
+        sess = async_get_clientsession(self.hass)
+        p = path.strip("/")
+
+        url = f"{self.base_url}/api/v1/repos/{owner}/{repo}/contents/{p}?ref={branch}"
+        try:
+            async with sess.get(url, headers=self._headers(), timeout=15) as resp:
+                if resp.status != 200:
+                    return []
+                data = await resp.json()
+                return data if isinstance(data, list) else []
+        except Exception:
+            return []
+
+    async def get_integration_domains(self, owner: str, repo: str, branch: str = "main") -> list[str]:
+        """Return possible integration domain folder(s) under custom_components/."""
+        entries = await self.list_dir(owner, repo, "custom_components", branch=branch)
+        domains: list[str] = []
+        for e in entries:
+            if (e or {}).get("type") == "dir":
+                name = (e.get("name") or "").strip()
+                if name and not name.startswith("."):
+                    domains.append(name)
+        return domains
+
+    async def get_file_commits(self, owner: str, repo: str, file_path: str, branch: str = "main", limit: int = 1) -> list[dict]:
+        """Fetch commit history for a specific file."""
+        sess = async_get_clientsession(self.hass)
+        p = file_path.strip("/")
+        url = f"{self.base_url}/api/v1/repos/{owner}/{repo}/commits?path={p}&sha={branch}&limit={limit}"
+        try:
+            async with sess.get(url, headers=self._headers(), timeout=20) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+        except Exception as e:
+            _LOGGER.debug("Failed to fetch file commits for %s/%s/%s: %s", owner, repo, file_path, e)
+        return []
+
+    async def get_file_info_with_history(self, owner: str, repo: str, file_path: str, branch: str = "main") -> dict | None:
+        """Get file content and last commit info (modifier, date)."""
+        # Get file content
+        content = await self.get_file_content(owner, repo, file_path, branch)
+        if content is None:
+            return None
+
+        # Get last commit for this file
+        commits = await self.get_file_commits(owner, repo, file_path, branch, limit=1)
+
+        last_modified_by = None
+        last_modified_at = None
+        commit_message = None
+
+        if commits and len(commits) > 0:
+            commit = commits[0]
+            committer = commit.get("committer") or commit.get("author") or {}
+            last_modified_by = committer.get("login") or committer.get("name") or committer.get("username")
+            # Try commit date first, then author date
+            commit_info = commit.get("commit", {})
+            committer_info = commit_info.get("committer") or commit_info.get("author") or {}
+            last_modified_at = committer_info.get("date") or commit.get("created")
+            commit_message = commit_info.get("message", "")
+
+        return {
+            "content": content,
+            "last_modified_by": last_modified_by,
+            "last_modified_at": last_modified_at,
+            "commit_message": commit_message,
+            "file_path": file_path,
+        }
+
+    async def list_dir_recursive(self, owner: str, repo: str, path: str = "", branch: str = "main") -> list[dict]:
+        """List directory contents with file info including last modified data."""
+        entries = await self.list_dir(owner, repo, path, branch)
+        result = []
+
+        for entry in entries:
+            if not isinstance(entry, dict):
+                continue
+
+            name = entry.get("name", "")
+            entry_type = entry.get("type", "")
+            entry_path = entry.get("path", "")
+
+            # Skip hidden files/directories
+            if name.startswith("."):
+                continue
+
+            item = {
+                "name": name,
+                "path": entry_path,
+                "type": entry_type,
+                "size": entry.get("size", 0),
+            }
+
+            # For files, get last commit info
+            if entry_type == "file":
+                # Only get commit info for documentation and YAML files
+                if name.lower().endswith(('.md', '.html', '.htm', '.txt', '.yaml', '.yml')):
+                    commits = await self.get_file_commits(owner, repo, entry_path, branch, limit=1)
+                    if commits and len(commits) > 0:
+                        commit = commits[0]
+                        committer = commit.get("committer") or commit.get("author") or {}
+                        item["last_modified_by"] = committer.get("login") or committer.get("name")
+                        commit_info = commit.get("commit", {})
+                        committer_info = commit_info.get("committer") or commit_info.get("author") or {}
+                        item["last_modified_at"] = committer_info.get("date") or commit.get("created")
+
+            result.append(item)
+
+        return result

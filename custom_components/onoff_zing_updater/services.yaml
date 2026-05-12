@@ -1,0 +1,56 @@
+install:
+  name: Install
+  description: Install an integration from the OnOff Gitea (asset zip or repo zipball).
+  fields:
+    owner:
+      name: Owner/Org
+      description: Gitea owner/org (if omitted uses the integration config default).
+      required: false
+      selector:
+        text:
+    repo:
+      name: Repo
+      description: Repository name (required).
+      required: true
+      selector:
+        text:
+    type:
+      name: Type
+      description: What to install.
+      required: true
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - integration
+            - lovelace
+            - blueprints
+            - audio
+    mode:
+      name: Mode
+      description: asset = release zipfile, zipball = repo snapshot zip (no asset required).
+      required: false
+      default: zipball
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - asset
+            - zipball
+    tag:
+      name: Tag
+      description: Release tag to install (if omitted uses latest release).
+      required: false
+      selector:
+        text:
+    asset_name:
+      name: Asset Name
+      description: Release asset filename (only for mode=asset). If omitted, auto-picks a single .zip.
+      required: false
+      selector:
+        text:
+
+check_updates:
+  name: Check for Updates
+  description: Manually check for updates for all tracked packages.
+  fields: {}
