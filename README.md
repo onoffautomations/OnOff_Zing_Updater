@@ -27,17 +27,11 @@ A Home Assistant custom integration for managing and updating custom integration
 8. Click **Download**
 9. Restart Home Assistant
 
-### Manual Installation
-
-1. Download the latest release from the [GitHub repository](https://github.com/onoffautomations/OnOff_Zing_Updater)
-2. Copy the `yidstore` folder to your `custom_components` directory
-3. Restart Home Assistant
-
 ## Setup
 
 1. Go to **Settings** > **Devices & Services**
 2. Click **Add Integration**
-3. Search for "OnOff Zing Updater"
+3. Search for "OnOff - Zing Updater"
 4. Select packages to install from the available list
 5. Click **Submit**
 6. If you installed any integrations, restart Home Assistant when prompted
