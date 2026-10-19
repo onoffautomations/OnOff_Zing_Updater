@@ -1,10 +1,13 @@
 {
   "domain": "onoff_zing_updater",
   "name": "OnOff - Zing Updater",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "documentation": "https://github.com/onoffautomations/OnOff_Zing_Updater",
   "config_flow": true,
   "requirements": [],
-  "codeowners": [],
-  "iot_class": "local_polling"
+  "codeowners": [
+    "@onoffautomations"
+  ],
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/onoffautomations/OnOff_Zing_Updater/issues"
 }

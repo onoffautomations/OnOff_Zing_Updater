@@ -3,16 +3,26 @@
     "step": {
       "user": {
         "title": "OnOff - Zing Updater",
-        "description": "Pick which Zing packages (and the OnOff Licenser) to install. Each package is labelled with its type — Integration, Card, or Blueprint — and will be installed to the right place automatically.\n\nYou can install more later by clicking Configure on the integration.",
+        "description": "Choose the release channel and the Zing packages to install (Zing Music, the Zing card and the OnOff Licenser).\n\nYou can install more later, or switch channel, with **Configure** on the integration.",
         "data": {
+          "channel": "Release channel",
           "packages": "Packages"
+        },
+        "data_description": {
+          "channel": "Stable installs normal releases. Beta also installs pre-releases with the newest features; switch back to Stable any time (you stay on your version until a newer stable release is out).",
+          "packages": "Each package is labelled with its type (Integration or Card) and installs to the right place."
         }
       },
       "reconfigure": {
         "title": "Install more Zing packages",
-        "description": "Pick packages to install. Packages already installed are preselected — leaving them checked will re-fetch and update them.",
+        "description": "Switch the release channel or install more packages. Packages you already have are ticked; leaving them ticked fetches the newest version for the chosen channel.",
         "data": {
+          "channel": "Release channel",
           "packages": "Packages"
+        },
+        "data_description": {
+          "channel": "Stable installs normal releases. Beta also installs pre-releases with the newest features; switch back to Stable any time (you stay on your version until a newer stable release is out).",
+          "packages": "Each package is labelled with its type (Integration or Card) and installs to the right place."
         }
       }
     },
@@ -32,9 +42,14 @@
     "step": {
       "init": {
         "title": "Manage Zing packages",
-        "description": "Pick packages to install. Packages already installed are preselected — leaving them checked will re-fetch and update them.",
+        "description": "Switch the release channel or install more packages. Packages you already have are ticked; leaving them ticked fetches the newest version for the chosen channel.",
         "data": {
+          "channel": "Release channel",
           "packages": "Packages"
+        },
+        "data_description": {
+          "channel": "Stable installs normal releases. Beta also installs pre-releases with the newest features; switch back to Stable any time (you stay on your version until a newer stable release is out).",
+          "packages": "Each package is labelled with its type (Integration or Card) and installs to the right place."
         }
       }
     },

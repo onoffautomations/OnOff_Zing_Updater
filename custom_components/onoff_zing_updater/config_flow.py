@@ -24,6 +24,9 @@ from homeassistant.helpers import config_validation as cv
 
 from .const import (
     DOMAIN,
+    CHANNELS,
+    CHANNEL_STABLE,
+    CONF_CHANNEL,
     LICENSER_OWNER,
     LICENSER_REPO,
     TYPE_BLUEPRINTS,
@@ -239,6 +242,7 @@ class OnOffZingUpdaterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     "base_url": get_primary_endpoint(),
                     "token": "",
                     "owner": "",
+                    CONF_CHANNEL: user_input.get(CONF_CHANNEL, CHANNEL_STABLE),
                     "pending_installs": pending,
                     "available_packages": self._packages,
                 },
@@ -250,6 +254,7 @@ class OnOffZingUpdaterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         schema = vol.Schema(
             {
+                vol.Required(CONF_CHANNEL, default=CHANNEL_STABLE): vol.In(CHANNELS),
                 vol.Optional("packages", default=[]): cv.multi_select(options),
             }
         )
@@ -274,6 +279,7 @@ class OnOffZingUpdaterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             selected = user_input.get("packages", []) or []
             new_data = dict(entry.data)
+            new_data[CONF_CHANNEL] = user_input.get(CONF_CHANNEL, entry.data.get(CONF_CHANNEL, CHANNEL_STABLE))
             new_data["pending_installs"] = selected
             new_data["available_packages"] = self._packages
             self.hass.config_entries.async_update_entry(entry, data=new_data)
@@ -289,6 +295,9 @@ class OnOffZingUpdaterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="reconfigure",
             data_schema=vol.Schema(
                 {
+                    vol.Required(
+                        CONF_CHANNEL, default=entry.data.get(CONF_CHANNEL, CHANNEL_STABLE)
+                    ): vol.In(CHANNELS),
                     vol.Optional("packages", default=list(already_tracked)): cv.multi_select(options),
                 }
             ),
@@ -310,6 +319,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             selected = user_input.get("packages", []) or []
             new_data = dict(entry.data)
+            new_data[CONF_CHANNEL] = user_input.get(CONF_CHANNEL, entry.data.get(CONF_CHANNEL, CHANNEL_STABLE))
             new_data["pending_installs"] = selected
             new_data["available_packages"] = packages
             self.hass.config_entries.async_update_entry(entry, data=new_data)
@@ -323,6 +333,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         already_tracked = _already_tracked_keys(self.hass, entry)
         schema = vol.Schema(
             {
+                vol.Required(
+                    CONF_CHANNEL, default=entry.data.get(CONF_CHANNEL, CHANNEL_STABLE)
+                ): vol.In(CHANNELS),
                 vol.Optional("packages", default=list(already_tracked)): cv.multi_select(options),
             }
         )

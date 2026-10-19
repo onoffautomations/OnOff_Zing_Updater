@@ -40,3 +40,12 @@ ATTR_RELEASE_NOTES = "release_notes"
 ZING_ORG = "Zing"
 LICENSER_OWNER = "OnOffPublic"
 LICENSER_REPO = "OnOff-Licenser"
+
+# Release channel: "stable" = normal releases only, "beta" = also pre-releases
+CONF_CHANNEL = "channel"
+CHANNEL_STABLE = "stable"
+CHANNEL_BETA = "beta"
+CHANNELS = {
+    CHANNEL_STABLE: "Stable - normal releases (recommended)",
+    CHANNEL_BETA: "Beta - newest features first (pre-releases)",
+}

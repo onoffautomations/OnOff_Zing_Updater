@@ -78,11 +78,12 @@ async def async_setup_entry(
 
     # Start periodic update check (only start once per entry)
     if not hasattr(coordinator, '_update_checker_started'):
-        async_track_time_interval(
+        # stopped when the entry unloads (it used to pile up a new timer on every reload)
+        entry.async_on_unload(async_track_time_interval(
             hass,
             coordinator.async_check_updates,
             timedelta(seconds=UPDATE_CHECK_INTERVAL)
-        )
+        ))
         coordinator._update_checker_started = True
         _LOGGER.info("Started update checker (every %d seconds)", UPDATE_CHECK_INTERVAL)
 

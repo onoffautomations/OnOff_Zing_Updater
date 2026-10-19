@@ -145,17 +145,43 @@ class GiteaClient:
             _LOGGER.debug("Failed to fetch user info for %s: %s", user, e)
         return None
 
-    async def get_releases(self, owner: str, repo: str) -> list[dict]:
-        """Fetch all releases for a repository."""
+    async def get_releases(self, owner: str, repo: str, max_pages: int = 5) -> list[dict]:
+        """Fetch releases for a repository, newest first (including pre-releases)."""
         sess = async_get_clientsession(self.hass)
-        url = f"{self.base_url}/api/v1/repos/{owner}/{repo}/releases"
-        try:
-            async with sess.get(url, headers=self._headers(), timeout=30) as resp:
-                if resp.status == 200:
-                    return await resp.json()
-        except Exception as e:
-            _LOGGER.debug("Failed to fetch releases for %s/%s: %s", owner, repo, e)
-        return []
+        out: list[dict] = []
+        for page in range(1, max_pages + 1):
+            url = f"{self.base_url}/api/v1/repos/{owner}/{repo}/releases?limit=50&page={page}"
+            try:
+                async with sess.get(url, headers=self._headers(), timeout=30) as resp:
+                    if resp.status != 200:
+                        break
+                    batch = await resp.json()
+            except Exception as e:
+                _LOGGER.debug("Failed to fetch releases for %s/%s: %s", owner, repo, e)
+                break
+            out.extend(batch or [])
+            if not batch or len(batch) < 50:
+                break
+        return out
+
+    async def get_latest_for_channel(self, owner: str, repo: str, channel: str = "stable") -> dict:
+        """Newest release for the channel.
+
+        stable: the newest normal release (a repo with only pre-releases falls back to its
+                newest pre-release, so it can still be installed).
+        beta:   the newest release, pre-releases included.
+        """
+        releases = [r for r in await self.get_releases(owner, repo) if not r.get("draft")]
+        if not releases:
+            raise RuntimeError(f"No releases found for {owner}/{repo}")
+
+        def published(rel: dict) -> str:
+            return rel.get("published_at") or rel.get("created_at") or ""
+
+        pool = releases
+        if channel != "beta":
+            pool = [r for r in releases if not r.get("prerelease")] or releases
+        return max(pool, key=published)
 
     async def get_file_content(self, owner: str, repo: str, file_path: str, branch: str = "main") -> str | None:
         """Fetch content of a specific file."""

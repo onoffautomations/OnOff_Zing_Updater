@@ -15,6 +15,8 @@ from homeassistant.helpers.storage import Store
 
 from .const import (
     DOMAIN,
+    CONF_CHANNEL,
+    CHANNEL_STABLE,
     SERVICE_INSTALL,
     SERVICE_CHECK_UPDATES,
     MODE_ASSET,
@@ -595,6 +597,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # Create coordinator for package tracking
     coordinator = OnOffGiteaStoreCoordinator(hass, entry.entry_id, client)
+    # Release channel chosen in the setup / Configure screen ("stable" or "beta")
+    channel = entry.data.get(CONF_CHANNEL, CHANNEL_STABLE)
+    coordinator.channel = channel
+    _LOGGER.info("Release channel: %s", channel)
     await coordinator.async_load_packages()
 
     # Build headers with optional auth
@@ -762,11 +768,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             _LOGGER.info("Using provided tag: %s", tag)
             return tag
 
-        latest = await client.get_latest_release(owner, repo)
+        try:
+            latest = await client.get_latest_for_channel(owner, repo, channel)
+        except Exception as err:  # no releases at all: use the default branch below
+            _LOGGER.debug("No release for %s/%s: %s", owner, repo, err)
+            latest = None
         if latest:
             ref = latest.get("tag_name") or latest.get("name")
             if ref:
-                _LOGGER.info("Using latest release tag: %s", ref)
+                _LOGGER.info("Using %s release tag: %s", channel, ref)
                 return ref
 
         repo_info = await client.get_repo(owner, repo)
@@ -778,7 +788,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if tag:
             _LOGGER.info("Using provided tag: %s", tag)
             return tag
-        latest = await client.get_latest_release(owner, repo)
+        latest = await client.get_latest_for_channel(owner, repo, channel)
         if not latest:
             raise RuntimeError("No releases found. For mode=asset you must create a Release with a ZIP asset.")
         resolved = latest.get("tag_name") or latest.get("name")

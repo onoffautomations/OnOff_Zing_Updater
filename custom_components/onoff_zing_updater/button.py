@@ -87,26 +87,17 @@ class PackageUpdateButton(ButtonEntity):
 
         _LOGGER.info("Update button pressed for %s/%s (type: %s)", owner, repo_name, package_type)
 
-        # Determine which service to call
-        if package_type == "integration":
-            service_name = "install_integration"
-        elif package_type == "lovelace":
-            service_name = "install_lovelace"
-        elif package_type == "blueprints":
-            service_name = "install_blueprints"
-        elif package_type == "audio":
-            service_name = "install"
-        else:
+        # One install service handles every package type (the old per-type services don't exist)
+        if package_type not in ("integration", "lovelace", "blueprints", "audio"):
             _LOGGER.error("Unknown package type: %s", package_type)
             return
+        service_name = "install"
 
-        # Build service data
         service_data = {
             "owner": owner,
             "repo": repo_name,
+            "type": package_type,
         }
-        if service_name == "install":
-            service_data["type"] = package_type
 
         if mode:
             service_data["mode"] = mode
@@ -129,9 +120,9 @@ class PackageUpdateButton(ButtonEntity):
                 "persistent_notification",
                 "create",
                 {
-                    "title": "YidStore - Update Started",
+                    "title": "OnOff - Zing Updater",
                     "message": f"Updating **{repo_name}**...\n\nCheck logs for progress.",
-                    "notification_id": f"yidstore_update_button_{self._package_id}"
+                    "notification_id": f"onoff_zing_updater_update_{self._package_id}"
                 },
                 blocking=False
             )

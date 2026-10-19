@@ -117,6 +117,11 @@ class PackageUpdateEntity(UpdateEntity):
             return None
         return None
 
+    def version_is_newer(self, latest_version: str, installed_version: str) -> bool:
+        """Understands v-prefixes, -beta.N pre-releases and "+" builds."""
+        from ._utils import is_newer
+        return is_newer(latest_version, installed_version)
+
     async def async_release_notes(self) -> str | None:
         """Return the release notes."""
         pkg = self.coordinator.packages.get(self.package_id, {})
@@ -130,7 +135,9 @@ class PackageUpdateEntity(UpdateEntity):
             owner = pkg.get("owner")
             repo = pkg.get("repo_name")
             if owner and repo:
-                release = await self.coordinator.client.get_latest_release(owner, repo)
+                release = await self.coordinator.client.get_latest_for_channel(
+                    owner, repo, getattr(self.coordinator, "channel", "stable")
+                )
                 if release:
                     return release.get("body", "No release notes available.")
         except Exception as e:

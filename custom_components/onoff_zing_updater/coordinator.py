@@ -31,6 +31,7 @@ class OnOffGiteaStoreCoordinator(DataUpdateCoordinator):
         self.hass = hass
         self.entry_id = entry_id
         self.client = client
+        self.channel = "stable"  # set by __init__ from the config entry
         self.packages: dict[str, dict[str, Any]] = {}
         self._store = Store(hass, STORAGE_VERSION, STORAGE_KEY_PACKAGES)
         self._custom_store = Store(hass, STORAGE_VERSION, f"{DOMAIN}.custom_repos")
@@ -227,7 +228,9 @@ class OnOffGiteaStoreCoordinator(DataUpdateCoordinator):
 
         _LOGGER.info("Checking for updates for %d packages...", len(self.packages))
 
-        for package_id, package_data in self.packages.items():
+        from ._utils import is_newer
+
+        for package_id, package_data in list(self.packages.items()):
             try:
                 if package_data.get("source", "gitea") in {"github", "hacs"}:
                     _LOGGER.debug("Skipping update check for %s repo: %s", package_data.get("source"), package_id)
@@ -239,15 +242,15 @@ class OnOffGiteaStoreCoordinator(DataUpdateCoordinator):
 
                 _LOGGER.debug("Checking %s/%s (installed: %s)", owner, repo, installed_version)
 
-                # Get latest release
-                latest_release = await self.client.get_latest_release(owner, repo)
+                # Newest release for the chosen channel (stable or beta)
+                latest_release = await self.client.get_latest_for_channel(owner, repo, self.channel)
 
                 if latest_release:
                     latest_version = latest_release.get("tag_name", "unknown")
                     _LOGGER.debug("Latest version: %s", latest_version)
 
-                    # Check if update available
-                    update_available = latest_version != installed_version
+                    # Only a NEWER version is an update (switching channel never offers a downgrade)
+                    update_available = is_newer(latest_version, installed_version)
 
                     # Update package data
                     package_data["latest_version"] = latest_version
