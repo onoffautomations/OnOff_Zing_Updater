@@ -2,7 +2,7 @@
   "config": {
     "step": {
       "user": {
-        "title": "OnOff - Zing Updater",
+        "title": "OnOff Zing Updater",
         "description": "Choose the release channel and the Zing packages to install (Zing Music, the Zing card and the OnOff Licenser).\n\nYou can install more later, or switch channel, with **Configure** on the integration.",
         "data": {
           "channel": "Release channel",
@@ -31,9 +31,9 @@
       "unknown": "Unexpected error occurred"
     },
     "abort": {
-      "already_configured": "OnOff - Zing Updater is already configured",
+      "already_configured": "OnOff Zing Updater is already configured",
       "no_packages": "No Zing packages are currently available",
-      "reconfigure_successful": "Configuration updated — selected packages are installing",
+      "reconfigure_successful": "Configuration updated. The selected packages are installing.",
       "cannot_reconfigure": "Reconfiguration is not possible at this time",
       "unknown": "An unexpected error occurred. Check logs for details."
     }
@@ -72,7 +72,7 @@
     },
     "setup_restart_required": {
       "title": "Restart required",
-      "description": "One or more integrations have been installed by OnOff - Zing Updater. Home Assistant must be restarted for the changes to take effect.\n\nGo to Settings → System → Restart to restart Home Assistant."
+      "description": "One or more integrations have been installed by OnOff Zing Updater. Home Assistant must be restarted for the changes to take effect.\n\nGo to Settings → System → Restart to restart Home Assistant."
     }
   }
 }

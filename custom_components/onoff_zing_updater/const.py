@@ -46,6 +46,6 @@ CONF_CHANNEL = "channel"
 CHANNEL_STABLE = "stable"
 CHANNEL_BETA = "beta"
 CHANNELS = {
-    CHANNEL_STABLE: "Stable - normal releases (recommended)",
-    CHANNEL_BETA: "Beta - newest features first (pre-releases)",
+    CHANNEL_STABLE: "Stable (recommended)",
+    CHANNEL_BETA: "Beta (newest features first)",
 }

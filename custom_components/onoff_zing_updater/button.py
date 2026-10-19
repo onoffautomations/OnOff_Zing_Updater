@@ -120,7 +120,7 @@ class PackageUpdateButton(ButtonEntity):
                 "persistent_notification",
                 "create",
                 {
-                    "title": "OnOff - Zing Updater",
+                    "title": "OnOff Zing Updater",
                     "message": f"Updating **{repo_name}**...\n\nCheck logs for progress.",
                     "notification_id": f"onoff_zing_updater_update_{self._package_id}"
                 },
@@ -135,7 +135,7 @@ class PackageUpdateButton(ButtonEntity):
                 "persistent_notification",
                 "create",
                 {
-                    "title": "YidStore - Update Failed",
+                    "title": "OnOff Zing Updater: update failed",
                     "message": f"Failed to update **{repo_name}**\n\nError: {str(e)}",
                     "notification_id": f"yidstore_update_error_{self._package_id}"
                 },

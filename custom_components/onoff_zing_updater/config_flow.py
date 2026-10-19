@@ -189,7 +189,7 @@ def _package_options(packages: list[dict]) -> dict[str, str]:
         label = f"[{tag}] {pkg.get('owner')}/{pkg.get('repo')}" if tag else f"{pkg.get('owner')}/{pkg.get('repo')}"
         desc = pkg.get("description")
         if desc:
-            label = f"{label} — {desc}"
+            label = f"{label} ({desc})"
         out[key] = label
     return out
 
@@ -237,7 +237,7 @@ class OnOffZingUpdaterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             pending = [key for key in selected if key in keymap]
 
             return self.async_create_entry(
-                title="OnOff - Zing Updater",
+                title="OnOff Zing Updater",
                 data={
                     "base_url": get_primary_endpoint(),
                     "token": "",

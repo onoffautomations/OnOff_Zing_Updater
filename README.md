@@ -2,7 +2,7 @@
   <img src="https://zingmusic.app/icons/Icon-192.png" alt="Zing Music" width="88" />
 </p>
 
-<h1 align="center">OnOff – Zing Updater</h1>
+<h1 align="center">OnOff Zing Updater</h1>
 
 <p align="center">
   Installs and updates everything for <b>Zing Music in Home Assistant</b>:<br/>
@@ -15,7 +15,7 @@
   </a>
   &nbsp;
   <a href="https://my.home-assistant.io/redirect/config_flow_start/?domain=onoff_zing_updater">
-    <img src="https://my.home-assistant.io/badges/config_flow_start.svg" alt="Open your Home Assistant instance and start setting up OnOff - Zing Updater." />
+    <img src="https://my.home-assistant.io/badges/config_flow_start.svg" alt="Open your Home Assistant instance and start setting up OnOff Zing Updater." />
   </a>
 </p>
 
@@ -44,14 +44,14 @@ Click **Open your Home Assistant instance and open a repository inside HACS** ab
 1. Open **HACS** from the sidebar.
 2. Click the **⋮** menu (top right) → **Custom repositories**.
 3. Repository: `https://github.com/onoffautomations/OnOff_Zing_Updater`, type **Integration** → **Add**.
-4. Search for **OnOff - Zing Updater**, open it and click **Download**.
+4. Search for **OnOff Zing Updater**, open it and click **Download**.
 </details>
 
 Then **restart Home Assistant** (Settings → System → Restart).
 
 ### 2. Set it up
 
-Click **Add integration to my Home Assistant** above, or go to **Settings → Devices & services → + Add integration** and search for **OnOff - Zing Updater**.
+Click **Add integration to my Home Assistant** above, or go to **Settings → Devices & services → + Add integration** and search for **OnOff Zing Updater**.
 
 The first screen is all there is:
 
@@ -70,7 +70,7 @@ Click **Submit**. The packages install in the background; when the **Restart req
 
 ## Changing the channel or adding packages
 
-Go to **Settings → Devices & services → OnOff - Zing Updater → Configure**.
+Go to **Settings → Devices & services → OnOff Zing Updater → Configure**.
 
 - **Release channel**: switch between Stable and Beta.
   - Stable → Beta: packages update to the newest beta right away (leave them ticked and Submit).

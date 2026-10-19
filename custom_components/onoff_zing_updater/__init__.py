@@ -628,7 +628,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         device_registry.async_get_or_create(
             config_entry_id=entry.entry_id,
             identifiers={(DOMAIN, entry.entry_id)},
-            name="OnOff - Zing Updater",
+            name="OnOff Zing Updater",
             manufacturer="OnOff Automations",
             model="Zing Updater Hub",
             entry_type=dr.DeviceEntryType.SERVICE,
